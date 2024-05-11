@@ -5,7 +5,7 @@ import { toast } from "react-toastify";
 import api from "../apiService";
 import { Container, Button, Box, Grid, Stack, Typography } from "@mui/material";
 import { useSelector, useDispatch } from "react-redux";
-import { fetchBookDetails } from "../service/slice";
+import { fetchBookDetails, addToReadingList } from "../service/slice";
 const BACKEND_API = process.env.REACT_APP_BACKEND_API;
 
 const BookDetailPage = () => {
@@ -14,27 +14,15 @@ const BookDetailPage = () => {
   const [addingBook, setAddingBook] = useState(false);
   const params = useParams();
   const bookId = params.id;
+  console.log(bookId);
   const { book, loading } = useSelector((state) => state.book);
   const dispatch = useDispatch();
-  const addToReadingList = () => {
-    setAddingBook(book);
+  const onAddToReadingList = () => {
+    dispatch(addToReadingList(book));
   };
 
   useEffect(() => {
-    const postData = async () => {
-      if (!addingBook) return;
-      try {
-        await api.post(`/favorites`, addingBook);
-        toast.success("The book has been added to the reading list!");
-      } catch (error) {
-        toast.error(error.message);
-      }
-    };
-    postData();
-  }, [addingBook]);
-
-  useEffect(() => {
-    dispatch(fetchBookDetails(bookId));
+    dispatch(fetchBookDetails({ bookId }));
     // const fetchData = async () => {
     //   setLoading(true);
     //   try {
@@ -46,7 +34,7 @@ const BookDetailPage = () => {
     //   setLoading(false);
     // };
     // fetchData();
-  }, [bookId]);
+  }, [dispatch, bookId]);
 
   return (
     <Container>
@@ -93,7 +81,7 @@ const BookDetailPage = () => {
                 <Button
                   variant="outlined"
                   sx={{ width: "fit-content" }}
-                  onClick={addToReadingList}
+                  onClick={onAddToReadingList}
                 >
                   Add to Reading List
                 </Button>

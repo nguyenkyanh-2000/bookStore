@@ -5,14 +5,16 @@ import axios from "axios";
 export const addToReadingList = createAsyncThunk(
   "books/addToReadingList",
   async (book) => {
-    const response = await api.post("/favorite", book);
+    const response = await api.post("/favorites", book);
     return response.data;
   }
 );
 export const fetchBookDetails = createAsyncThunk(
   "books/fetchBookDetails",
   async ({ bookId }) => {
+    console.log(bookId, "slice");
     const response = await axios.get(`http://localhost:5000/books/${bookId}`);
+    console.log(response.data, "response");
     return response.data;
   }
 );
@@ -22,7 +24,6 @@ export const getBooks = createAsyncThunk(
     let url = `/books?_page=${pageNum}&_limit=${limit}`;
     if (query) url += `&q=${query}`;
     const response = await api.get(url);
-    console.log(response.data, "data");
     return response.data;
   }
 );
@@ -36,56 +37,39 @@ export const bookSlice = createSlice({
     isloading: false,
     errorMessage: null,
   },
-  extraReducer: {
-    [getBooks.pending]: (state, action) => {
-      state.isloading = true;
-    },
-    [getBooks.fulfilled]: (state, action) => {
-      state.isloading = false;
-      state.books = action.payload;
-      console.log(action.payload, "ful");
-    },
-    [getBooks.rejected]: (state, action) => {
-      state.isloading = false;
-      state.error = action.payload;
-    },
-
-    [fetchBookDetails.pending]: (state, action) => {
-      state.isloading = true;
-    },
-    [fetchBookDetails.fulfilled]: (state, action) => {
-      state.isloading = false;
-      state.book = action.payload;
-    },
-    [fetchBookDetails.rejected]: (state, action) => {
-      state.isloading = false;
-      state.error = action.payload;
-    },
-
-    [addToReadingList.pending]: (state, action) => {
-      state.isloading = true;
-    },
-    [addToReadingList.fulfilled]: (state, action) => {
-      state.isloading = false;
-      state.book = action.payload;
-    },
-    [addToReadingList.rejected]: (state, action) => {
-      state.isloading = false;
-      state.error = action.payload;
-    },
+  reducers: {},
+  extraReducers: (builder) => {
+    builder
+      .addCase(getBooks.pending, (state) => {
+        state.isloading = true;
+      })
+      .addCase(getBooks.fulfilled, (state, action) => {
+        state.isloading = false;
+        state.books = action.payload;
+      })
+      .addCase(getBooks.rejected, (state) => {
+        state.isloading = false;
+      })
+      .addCase(fetchBookDetails.pending, (state) => {
+        state.isloading = true;
+      })
+      .addCase(fetchBookDetails.fulfilled, (state, action) => {
+        state.isloading = false;
+        state.book = action.payload;
+      })
+      .addCase(fetchBookDetails.rejected, (state) => {
+        state.isloading = false;
+      })
+      .addCase(addToReadingList.pending, (state) => {
+        state.isloading = true;
+      })
+      .addCase(addToReadingList.fulfilled, (state, action) => {
+        state.isloading = false;
+        state.bookList.push(action.payload);
+      })
+      .addCase(addToReadingList.rejected, (state) => {
+        state.isloading = false;
+      });
   },
 });
-// export const { getBookSuccess } = bookSlice.actions;
-
-// export const getBook =
-//   ({ pageNum, limit, query }) =>
-//   async (dispatch) => {
-//     try {
-//       let url = `/books?_page=${pageNum}&_limit=${limit}`;
-//       if (query) url += `&q=${query}`;
-//       const res = await api.get(url);
-//       dispatch(getBookSuccess(res.data));
-//       console.log(res, "res");
-//     } catch (error) {}
-//   };
 export default bookSlice.reducer;

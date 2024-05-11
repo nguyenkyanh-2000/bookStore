@@ -54,7 +54,7 @@ const HomePage = () => {
     //   setLoading(false);
     // };
     // fetchData();
-  }, [pageNum, limit, query]);
+  }, [dispatch, pageNum, limit, query]);
   //--------------form
   const defaultValues = {
     searchQuery: "",
